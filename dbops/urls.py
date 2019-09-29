@@ -15,10 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from mysql import views
+from django.urls import include
+from mysql import urls
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('index/', views.index),
-    path('', views.index),
-    path('base/',views.base),
+    path('mysql/',  include('mysql.urls')),
+    path('captcha/', include('captcha.urls')),
+
 ]
