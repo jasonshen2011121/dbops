@@ -8,5 +8,5 @@ urlpatterns = [
     path('index/', views.index),
     path('register/', views.register),
     path('submitSql/', views.submitSql),
-    path('test/', views.test),
+    path('test/<int:id>/', views.test, name='test'),
     ]

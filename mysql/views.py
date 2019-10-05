@@ -158,7 +158,7 @@ def hash_code(s, salt='mysite'):# 加点盐
     return h.hexdigest()
 
 
-def test(request):
+def test(request,id):
     return render(request, 'mysql/test.html')
 
 def index(request):
