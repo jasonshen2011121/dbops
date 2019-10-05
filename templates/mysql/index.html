@@ -34,13 +34,14 @@
 
                     <tr>	
                         <td>{{ forloop.counter }}</td>	
-                        <td><a href="{% url 'mysql:test' a.id %}">{{ a.instance_name }}</a></td>
+                        <td>{{ a.instance_name }}</td>
                         <td>{{ a.address }}</td>
                         <td>{{ a.user }}</td>
                         <td>{{ a.pwd }}</td>
                         <td>{{ a.version }}</td>
                         <td>{{ a.isslave }}</td>
                         <td>{{ a.created_by }}</td>
+                        <td><a href="{% url 'mysql:test' a.id %}">执行sql</a></td>
                     </tr>	
 
                 {% empty %}	
@@ -69,9 +70,12 @@
 
 <script>
 
-
 $(function () {
         $('#instance_table').DataTable({
+          dom: '<"pull-left"B>ft<"pull-left"i>p',
+          "columnDefs": [
+            { targets: [3,4], visible: false}
+          ],
           "paging": true,       <!-- 允许分页 -->
           "lengthChange": true, <!-- 允许改变每页显示的行数 -->
           "searching": true,    <!-- 允许内容搜索 -->
@@ -80,7 +84,6 @@ $(function () {
           "autoWidth": false    <!-- 固定宽度 -->
         });
       });
-
 </script>
 
 {% endblock %}
