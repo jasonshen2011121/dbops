@@ -1,17 +1,51 @@
 {% extends "base.html" %}
+{% block css %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
+
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+{% endblock %}
 
 {% block content %}
-                <div class="col-md-9 column">
-                    <pre id="sql_content_editor" style="min-height:400px"></pre>
-                </div>
-{% endblock content %}
 
+<table id="table" class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ID</th>
+      <th>Item name</th>
+      <th>Item price</th>
+      <th>列1</th>
+      <th>列2</th>
+      <th>列3</th>
+      <th>列4</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+</table>
+
+
+{% endblock content %}
 {% block js %}
-    {% load static %}
-    <script src="{% static 'ace/ace.js' %}"></script>
-    <script src="{% static 'ace/ext-language_tools.js' %}"></script>
-    <script src="{% static 'ace/mode-sql.js' %}"></script>
-    <script src="{% static 'ace/theme-github.js' %}"></script>
-    <script src="{% static 'ace/snippets/sql.js' %}"></script>
-    <script src="{% static 'ace/ace_init.js' %}"></script>
+$('#table').DataTable({
+    ajax: {
+        url: '/static/json/data.json',
+        dataSrc: ''
+    },
+    columns: [
+        { "data": null , defaultContent: '' },
+        { "data": "id" },
+        { "data": "name"},
+        { "data": "price"},
+        { "data": "column1" },
+        { 'data': "column2" },
+        { "data": "column3" },
+        { "data": "column4" },
+        { "data": null , defaultContent: ''}
+    ]
+});
 {% endblock %}

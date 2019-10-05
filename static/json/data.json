@@ -1,0 +1,15 @@
+{
+    "DT_RowId": "row_1",
+    "users": {
+        "id": "1",
+        "last_name": "Contreras",
+        "item_price": 100,
+        "c1": 1,
+        "c2": 2,
+        "c3": 3,
+        "c4": 4
+    },
+    "sites": {
+        "name": "mysql"
+    }
+}

@@ -12,8 +12,10 @@ from collections import OrderedDict
 from . import models
 from .dao import Dao
 dao = Dao()
+from django.http import HttpResponse, HttpResponseRedirect
 
 # 提交SQL的页面
+# 输入参数为实例名，通过http post过来，所以前面一个form的发送为实例名
 def submitSql(request):
     #如果没有实例，跳转到添加实例页面
     masters = mysqlIns.objects.all().order_by('instance_name')
@@ -41,6 +43,87 @@ def submitSql(request):
     context = {'dictAllClusterDb': dictAllClusterDb}
     return render(request, 'mysql/submitSql.html', context)
 
+def autoreview(request):
+    workflowid = request.POST.get('workflowid')
+    sqlContent = request.POST['sql_content']
+    workflowName = request.POST['workflow_name']
+    clusterName = request.POST['cluster_name']
+    isBackup = request.POST['is_backup']
+    reviewMan = request.POST['review_man']
+    subReviewMen = request.POST.get('sub_review_man', '')
+    listAllReviewMen = (reviewMan, subReviewMen)
+
+    # 服务器端参数验证
+    if sqlContent is None or workflowName is None or clusterName is None or isBackup is None or reviewMan is None:
+        context = {'errMsg': '页面提交参数可能为空'}
+        return render(request, 'error.html', context)
+    sqlContent = sqlContent.rstrip()
+    if sqlContent[-1] != ";":
+        context = {'errMsg': "SQL语句结尾没有以;结尾，请后退重新修改并提交！"}
+        return render(request, 'error.html', context)
+
+    # 交给inception进行自动审核
+    try:
+        result = inceptionDao.sqlautoReview(sqlContent, clusterName)
+    except Exception as msg:
+        context = {'errMsg': msg}
+        return render(request, 'error.html', context)
+    if result is None or len(result) == 0:
+        context = {'errMsg': 'inception返回的结果集为空！可能是SQL语句有语法错误'}
+        return render(request, 'error.html', context)
+    # 要把result转成JSON存进数据库里，方便SQL单子详细信息展示
+    jsonResult = json.dumps(result)
+
+    # 遍历result，看是否有任何自动审核不通过的地方，一旦有，则为自动审核不通过；没有的话，则为等待人工审核状态
+    workflowStatus = Const.workflowStatus['manreviewing']
+    for row in result:
+        if row[2] == 2:
+            # 状态为2表示严重错误，必须修改
+            workflowStatus = Const.workflowStatus['autoreviewwrong']
+            break
+        elif re.match(r"\w*comments\w*", row[4]):
+            workflowStatus = Const.workflowStatus['autoreviewwrong']
+            break
+
+    # 存进数据库里
+    engineer = request.session.get('login_username', False)
+    if not workflowid:
+        Workflow = workflow()
+        Workflow.create_time = timezone.now()
+    else:
+        Workflow = workflow.objects.get(id=int(workflowid))
+    Workflow.workflow_name = workflowName
+    Workflow.engineer = engineer
+    Workflow.review_man = json.dumps(listAllReviewMen, ensure_ascii=False)
+    Workflow.status = workflowStatus
+    Workflow.is_backup = isBackup
+    Workflow.review_content = jsonResult
+    Workflow.cluster_name = clusterName
+    Workflow.sql_content = sqlContent
+    Workflow.execute_result = ''
+    Workflow.audit_remark = ''
+    Workflow.save()
+    workflowId = Workflow.id
+
+    # 自动审核通过了，才发邮件
+    if workflowStatus == Const.workflowStatus['manreviewing']:
+        # 如果进入等待人工审核状态了，则根据settings.py里的配置决定是否给审核人发一封邮件提醒.
+        if hasattr(settings, 'MAIL_ON_OFF') == True:
+            if getattr(settings, 'MAIL_ON_OFF') == "on":
+                url = getDetailUrl(request) + str(workflowId) + '/'
+
+                # 发一封邮件
+                strTitle = "新的SQL上线工单提醒 # " + str(workflowId)
+                strContent = "发起人：" + engineer + "\n审核人：" + str(
+                    listAllReviewMen) + "\n工单地址：" + url + "\n工单名称： " + workflowName + "\n具体SQL：" + sqlContent
+                reviewManAddr = [email['email'] for email in
+                                 users.objects.filter(username__in=listAllReviewMen).values('email')]
+                mailSender.sendEmail(strTitle, strContent, reviewManAddr)
+            else:
+                # 不发邮件
+                pass
+
+    return HttpResponseRedirect(reverse('sql:detail', args=(workflowId,)))
 
 def send_email(email, code):
 

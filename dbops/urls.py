@@ -20,7 +20,7 @@ from mysql import urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('mysql/',  include('mysql.urls')),
+    path('mysql/',  include(('mysql.urls', "mysql"), namespace="mysql")),
     path('captcha/', include('captcha.urls')),
 
 ]

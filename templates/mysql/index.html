@@ -25,6 +25,7 @@
                         <th>版本</th>
                         <th>是否从库</th>
                         <th>创建方法</th>
+                        <th>操作</th>
                     </tr>	
                 </thead>	
                 <tbody>	
@@ -39,7 +40,8 @@
                         <td>{{ a.pwd }}</td>
                         <td>{{ a.version }}</td>
                         <td>{{ a.isslave }}</td>
-                        <td>{{ a.created_by }}</td>	
+                        <td>{{ a.created_by }}</td>
+                        <td><a href="{% url 'mysql:test' a.id %}">{{ a.instance_name }}</a></td>
                     </tr>	
 
                 {% empty %}	
