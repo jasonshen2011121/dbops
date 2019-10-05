@@ -159,7 +159,8 @@ def hash_code(s, salt='mysite'):# 加点盐
 
 
 def test(request,id):
-    return render(request, 'mysql/test.html')
+    ins_id = id;
+    return render(request, 'mysql/test.html',locals())
 
 def index(request):
     """
