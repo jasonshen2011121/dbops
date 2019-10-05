@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}	
 
+
    <!-- Main content -->	
     <section class="content">	
       <div class="row">	
@@ -13,13 +14,17 @@
         <!-- /.box-header -->	
         <div class="box-body">	
 
-            <table id="instance" class="table table-bordered table-striped">	
+            <table id="instance_table" class="table table-bordered table-striped">
                 <thead>	
-                    <tr>	
+                    <tr>
+                        <th>id</th>
                         <th>实例名</th>	
-                        <th>实例地址</th>	
-                        <th>版本</th>	
-                        <th>创建方法</th>	
+                        <th>实例地址</th>
+                        <th>用户</th>
+                        <th>密码</th>
+                        <th>版本</th>
+                        <th>是否从库</th>
+                        <th>创建方法</th>
                     </tr>	
                 </thead>	
                 <tbody>	
@@ -29,7 +34,11 @@
                     <tr>	
                         <td>{{ forloop.counter }}</td>	
                         <td>{{ a.instance_name }}</td>	
-                        <td>{{ a.address }}</td>	
+                        <td>{{ a.address }}</td>
+                        <td>{{ a.user }}</td>
+                        <td>{{ a.pwd }}</td>
+                        <td>{{ a.version }}</td>
+                        <td>{{ a.isslave }}</td>
                         <td>{{ a.created_by }}</td>	
                     </tr>	
 
@@ -49,4 +58,28 @@
     <!-- /.row -->	
     </section>	
 
-{% endblock %} 
+{% endblock %}
+
+{% load static %}
+{% block script %}
+
+<script src="{% static 'adminlet-2.4.10/bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'adminlet-2.4.10/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+
+<script>
+
+
+$(function () {
+        $('#instance_table').DataTable({
+          "paging": true,       <!-- 允许分页 -->
+          "lengthChange": true, <!-- 允许改变每页显示的行数 -->
+          "searching": true,    <!-- 允许内容搜索 -->
+          "ordering": true,     <!-- 允许排序 -->
+          "info": true,         <!-- 显示信息 -->
+          "autoWidth": false    <!-- 固定宽度 -->
+        });
+      });
+
+</script>
+
+{% endblock %}

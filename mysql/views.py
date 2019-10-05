@@ -2,12 +2,45 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from .utils import *
-from . import models
+from .models import mysqlIns
 from . import forms
 # Create your views here.
 import hashlib
 import datetime
 from django.conf import settings
+from collections import OrderedDict
+from . import models
+from .dao import Dao
+dao = Dao()
+
+# 提交SQL的页面
+def submitSql(request):
+    #如果没有实例，跳转到添加实例页面
+    masters = mysqlIns.objects.all().order_by('instance_name')
+    #if len(masters) == 0:
+     #   return HttpResponseRedirect('/admin/sql/master_config/add/')
+
+    # 获取所有集群名称
+    listAllClusterName = [master.instance_name for master in masters]
+
+    dictAllClusterDb = OrderedDict()
+    # 每一个都首先获取主库地址在哪里
+    for ins in listAllClusterName:
+        listMasters = mysqlIns.objects.filter(instance_name=ins)
+        # 取出该集群的名称以及连接方式，为了后面连进去获取所有databases
+        masterHost = listMasters[0].address
+        masterPort = 3306
+        masterUser = listMasters[0].user
+        masterPassword = listMasters[0].pwd
+        try:
+            listDb = dao.getAlldbByCluster(masterHost, masterPort, masterUser, masterPassword)
+            dictAllClusterDb[ins] = listDb
+        except Exception as msg:
+            dictAllClusterDb[ins] = [str(msg)]
+
+    context = {'dictAllClusterDb': dictAllClusterDb}
+    return render(request, 'mysql/submitSql.html', context)
+
 
 def send_email(email, code):
 
@@ -41,10 +74,20 @@ def hash_code(s, salt='mysite'):# 加点盐
     h.update(s.encode())  # update方法只接收bytes类型
     return h.hexdigest()
 
+
+def test(request):
+    return render(request, 'mysql/test.html')
+
 def index(request):
+    """
+    资产总表视图
+    :param request:
+    :return:
+    """
     if not request.session.get('is_login', None):
         return redirect('/mysql/login')
-    return render(request, 'mysql/index.html')
+    instance = mysqlIns.objects.all()
+    return render(request, 'mysql/index.html', locals())
 
 
 def login(request):

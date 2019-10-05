@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+                <div class="col-md-9 column">
+                    <pre id="sql_content_editor" style="min-height:400px"></pre>
+                </div>
+{% endblock content %}
+
+{% block js %}
+    {% load static %}
+    <script src="{% static 'ace/ace.js' %}"></script>
+    <script src="{% static 'ace/ext-language_tools.js' %}"></script>
+    <script src="{% static 'ace/mode-sql.js' %}"></script>
+    <script src="{% static 'ace/theme-github.js' %}"></script>
+    <script src="{% static 'ace/snippets/sql.js' %}"></script>
+    <script src="{% static 'ace/ace_init.js' %}"></script>
+{% endblock %}
