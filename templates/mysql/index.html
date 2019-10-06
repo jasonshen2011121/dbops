@@ -41,7 +41,7 @@
                         <td>{{ a.version }}</td>
                         <td>{{ a.isslave }}</td>
                         <td>{{ a.created_by }}</td>
-                        <td><a href="{% url 'mysql:test' a.id %}">执行sql</a></td>
+                        <td><a href="{% url 'mysql:submitSql'  a.instance_name %}">执行sql</a></td>
                     </tr>	
 
                 {% empty %}	

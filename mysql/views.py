@@ -16,32 +16,26 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 # 提交SQL的页面
 # 输入参数为实例名，通过http post过来，所以前面一个form的发送为实例名
-def submitSql(request):
-    #如果没有实例，跳转到添加实例页面
-    masters = mysqlIns.objects.all().order_by('instance_name')
-    #if len(masters) == 0:
-     #   return HttpResponseRedirect('/admin/sql/master_config/add/')
 
-    # 获取所有集群名称
-    listAllClusterName = [master.instance_name for master in masters]
-
+def submitSql(request, ins_name):
+    #ins_name = ins_name
     dictAllClusterDb = OrderedDict()
-    # 每一个都首先获取主库地址在哪里
-    for ins in listAllClusterName:
-        listMasters = mysqlIns.objects.filter(instance_name=ins)
-        # 取出该集群的名称以及连接方式，为了后面连进去获取所有databases
-        masterHost = listMasters[0].address
-        masterPort = 3306
-        masterUser = listMasters[0].user
-        masterPassword = listMasters[0].pwd
-        try:
-            listDb = dao.getAlldbByCluster(masterHost, masterPort, masterUser, masterPassword)
-            dictAllClusterDb[ins] = listDb
-        except Exception as msg:
-            dictAllClusterDb[ins] = [str(msg)]
+    ins_model = mysqlIns.objects.filter(instance_name=ins_name)
+    host = ins_model[0].address
+    port = 3306
+    user = ins_model[0].user
+    pwd  = ins_model[0].pwd
 
+    try:
+        listDb = dao.getAlldbByCluster(host, port, user, pwd)
+        #print (listDb)
+        dictAllClusterDb[ins_name] = listDb
+        print (listDb)
+    except Exception as msg:
+        dictAllClusterDb[ins_name] = [str(msg)]
+    dictAllClusterDb=dictAllClusterDb[ins_name]
     context = {'dictAllClusterDb': dictAllClusterDb}
-    return render(request, 'mysql/submitSql.html', context)
+    return render(request, 'mysql/test.html', locals())
 
 def autoreview(request):
     workflowid = request.POST.get('workflowid')
@@ -158,8 +152,8 @@ def hash_code(s, salt='mysite'):# 加点盐
     return h.hexdigest()
 
 
-def test(request,id):
-    ins_id = id;
+def test(request,ins_name):
+    ins_name = ins_name
     return render(request, 'mysql/test.html',locals())
 
 def index(request):

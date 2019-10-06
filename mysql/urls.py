@@ -7,6 +7,5 @@ urlpatterns = [
     path('login/', views.login),
     path('index/', views.index),
     path('register/', views.register),
-    path('submitSql/', views.submitSql),
-    path('test/<int:id>/', views.test, name='test'),
+    path('submitSql/<str:ins_name>/', views.submitSql,name='submitSql'),
     ]
