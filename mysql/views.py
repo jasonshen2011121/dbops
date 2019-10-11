@@ -17,10 +17,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 # 提交SQL的页面
 # 输入参数为实例名，通过http post过来，所以前面一个form的发送为实例名
 
-def submitSql(request, ins_name):
-    #ins_name = ins_name
+def gotosqlpage(request, instance_name):
     dictAllClusterDb = OrderedDict()
-    ins_model = mysqlIns.objects.filter(instance_name=ins_name)
+    ins_model = mysqlIns.objects.filter(instance_name=instance_name)
     host = ins_model[0].address
     port = 3306
     user = ins_model[0].user
@@ -28,12 +27,11 @@ def submitSql(request, ins_name):
 
     try:
         listDb = dao.getAlldbByCluster(host, port, user, pwd)
-        #print (listDb)
-        dictAllClusterDb[ins_name] = listDb
+        dictAllClusterDb[instance_name] = listDb
         print (listDb)
     except Exception as msg:
-        dictAllClusterDb[ins_name] = [str(msg)]
-    dictAllClusterDb=dictAllClusterDb[ins_name]
+        dictAllClusterDb[instance_name] = [str(msg)]
+    dictAllClusterDb=dictAllClusterDb[instance_name]
     context = {'dictAllClusterDb': dictAllClusterDb}
     return render(request, 'mysql/test.html', locals())
 
